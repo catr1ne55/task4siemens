@@ -2,13 +2,8 @@ from scipy.io.wavfile import read
 import matplotlib.pyplot as plt
 import sounddevice as sd
 import numpy as np
-from scipy.signal import fftconvolve
-
-
-def similarity(template, test):
-    corr = fftconvolve(template, test, mode='same')
-
-    return corr
+from operator import itemgetter
+from heapq import nlargest
 
 
 def record_audio(fs=44100, duration=5):
@@ -82,10 +77,11 @@ def display(audio, reference, correlation, name='Plot.png'):
     """
 
     plt.plot(audio, 'black')
-    crossCorrelationMax = np.argmax(np.abs(correlation))
-
-    plt.axvspan(crossCorrelationMax, crossCorrelationMax + np.size(reference), facecolor='r')
+    crossCorrelationMax = nlargest(50, enumerate(correlation), itemgetter(1))
+    for i in crossCorrelationMax:
+        plt.axvline(i[0])
+        plt.axvspan(i[0], i[0] + np.size(reference), facecolor='r')
     plt.ylabel("Amplitude")
     plt.xlabel("Time")
-    plt.title("Sample Wav")
+    plt.title("Result")
     plt.savefig(name)
